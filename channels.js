@@ -5,7 +5,7 @@
   Supports: HLS (.m3u8), DASH (.mpd with ClearKey DRM), and YouTube embeds.
 */
 
-window.channels = [
+const combinedChannels = [
   /* ---------- HLS STREAMS ---------- */
   { name: "Jugo Pinoy TV", type: "hls", category: "Local Channels", live: true,
     logo: "https://dito.ph/hubfs/Dito_July2021/Ott%20Pages/Jungo-img/Jungo-logo.png",
