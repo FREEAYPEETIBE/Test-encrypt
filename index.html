@@ -75,12 +75,13 @@ body{
   max-width:1400px;
   width:92%;
   text-align:center;
-  padding:36px;
+  padding:0; /* remove vertical push */
   border-radius:14px;
   color:#fff;
   display:flex;
   flex-direction:column;
   align-items:center;
+  justify-content:center; /* NEW: perfectly center all content */
   gap:12px;
 }
 
@@ -93,7 +94,9 @@ body{
   display: block;
   margin-left: auto;
   margin-right: auto;
+  margin-top: 0 !important;
   margin-bottom: 30px;
+  margin-top: 0 !important;
 }
 
 .welcome{
