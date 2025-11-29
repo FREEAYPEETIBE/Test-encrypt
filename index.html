@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Esparagoza Dental Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+
+<style>
+:root{
+  --brand:#0b6bcb;
+  --accent:#2ea0ff;
+  --success:#00b386;
+  --danger:#d9534f;
+  --card-bg:#ffffff;
+  --muted:#999;
+}
+
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+  font-family:'Poppins',sans-serif;
+  scroll-behavior:smooth;
+}
+html,body{height:100%}
+body{
+  background:linear-gradient(180deg,#e9f4ff 0%,#f4f9ff 100%);
+  min-height:100vh;
+  overflow-x:hidden;
+  color:var(--brand);
+}
+
+.app{
+  position:relative;
+  min-height:100vh;
+  display:flex;
+  align-items:stretch;
+  justify-content:center;
+}
+
+/* FRONT PAGE */
+#frontPage{
+  position:fixed;
+  inset:0;
+  background-image:url('https://i.imgur.com/qKJc5zC.png'); /* UPDATED BACKGROUND */
+  background-size:cover;
+  background-position:center;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:40;
+  opacity:1;
+  transform:scale(1);
+  transition:opacity .7s ease,transform .7s ease;
+}
+
+#frontPage.fadeOut{
+  opacity:0;
+  pointer-events:none;
+  transform:scale(1.03);
+}
+
+.front-overlay{
+  position:absolute;
+  inset:0;
+  background:linear-gradient(180deg,rgba(0,0,0,.25),rgba(255,255,255,.08));
+  backdrop-filter:blur(1px);
+}
+
+.front-inner{
+  position:relative;
+  z-index:2;
+  max-width:920px;
+  width:92%;
+  text-align:center;
+  padding:36px;
+  border-radius:14px;
+  color:#fff;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:12px;
+}
+
+/* updated logo */
+.logo-big{
+  width:200px;
+  height:auto;
+  border-radius:10px;
+  box-shadow:0 8px 30px rgba(0,0,0,.25);
+}
+
+.welcome{
+  font-size:28px;
+  font-weight:700;
+  color:#fff;
+  text-shadow:0 3px 14px rgba(0,0,0,.4);
+}
+
+.muted-white{color:rgba(255,255,255,.9);font-weight:600}
+
+.meta-row{
+  display:flex;
+  gap:14px;
+  align-items:center;
+  flex-wrap:wrap;
+  justify-content:center;
+}
+
+.pill{
+  background:rgba(255,255,255,.12);
+  padding:10px 14px;
+  border-radius:999px;
+  font-weight:700;
+  color:#fff;
+}
+
+.status-in{
+  background:linear-gradient(90deg,#67e3a1,#00b386);
+  color:#053017;
+}
+
+.status-out{
+  background:linear-gradient(90deg,#ffdede,#ff8a8a);
+  color:#4a0b0b;
+}
+
+.cta-btn{
+  margin-top:12px;
+  padding:14px 22px;
+  border-radius:12px;
+  border:none;
+  font-weight:700;
+  background:linear-gradient(90deg,var(--accent),var(--brand));
+  color:#fff;
+  cursor:pointer;
+  box-shadow:0 8px 26px rgba(11,107,203,.24);
+  transition:transform .16s ease;
+}
+.cta-btn:active{transform:translateY(1px) scale(.997)}
+
+/* BOOKING PAGE */
+#bookingPage{
+  opacity:0;
+  transform:translateY(12px);
+  transition:opacity .7s ease,transform .7s ease;
+  max-width:980px;
+  width:100%;
+  padding:28px 20px;
+  margin:36px auto 80px;
+}
+#bookingPage.show{
+  opacity:1;
+  transform:translateY(0);
+}
+
+/* updated logo */
+.book-logo{
+  display:block;
+  margin:0 auto 10px auto;
+  width:100px;
+}
+
+.card{
+  background:var(--card-bg);
+  border-radius:16px;
+  box-shadow:0 10px 30px rgba(7,36,63,.08);
+  padding:22px;
+  margin:18px auto;
+  max-width:520px;
+}
+
+label{
+  display:block;
+  margin:8px 0 4px;
+  color:var(--brand);
+  font-weight:600;
+}
+
+input,select,textarea{
+  width:100%;
+  padding:10px 12px;
+  border:1px solid #d5e6f7;
+  border-radius:10px;
+  font-size:15px;
+  outline:none;
+}
+
+.btn-primary{
+  cursor:pointer;
+  transition:.3s;
+  background:linear-gradient(90deg,var(--accent),var(--brand));
+  color:#fff;
+  border:none;
+  border-radius:10px;
+  padding:12px 18px;
+  font-weight:700;
+  width:100%;
+}
+
+.weeknames{
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  gap:4px;
+  color:#3b6b90;
+  font-size:12px;
+  text-align:center;
+  margin-bottom:6px;
+}
+
+.cal-grid{
+  display:grid;
+  grid-template-columns:repeat(7,minmax(0,1fr));
+  gap:8px;
+  width:100%;
+}
+
+.day-tile{
+  aspect-ratio:1/1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:10px;
+  background:#fff;
+  color:var(--brand);
+  font-weight:600;
+  cursor:pointer;
+  transition:background .2s,transform .2s;
+}
+.day-tile:hover{transform:scale(1.06)}
+.day-tile.today{border:2px solid var(--brand)}
+.day-tile.closed{
+  background:#e0e0e0;
+  color:#888;
+  cursor:not-allowed;
+}
+
+.slot-btn{
+  padding:10px;
+  border:none;
+  border-radius:8px;
+  margin:4px;
+  background:#e7f1ff;
+  color:var(--brand);
+  font-weight:600;
+  transition:all .2s;
+}
+.slot-btn.selected{
+  background:var(--brand);
+  color:#fff;
+}
+.slot-btn.booked{
+  background:#ccc;
+  color:#666;
+  cursor:not-allowed;
+}
+
+.toast-wrap{
+  position:fixed;
+  bottom:20px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:1000;
+}
+
+.toast{
+  background:var(--brand);
+  color:#fff;
+  padding:10px 16px;
+  border-radius:8px;
+  margin-top:8px;
+  opacity:0;
+  transition:opacity .3s;
+}
+.toast.show{opacity:1}
+.toast.success{background:var(--success)}
+.toast.error{background:var(--danger)}
+
+.modal-overlay{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.4);
+  backdrop-filter:blur(4px);
+  justify-content:center;
+  align-items:center;
+  z-index:1001;
+  opacity:0;
+  transition:opacity .5s ease;
+}
+.modal-overlay.show{display:flex;opacity:1}
+
+.modal-content{
+  background:#fff;
+  border-radius:16px;
+  max-width:420px;
+  width:90%;
+  padding:20px;
+  box-shadow:0 10px 30px rgba(0,0,0,.15);
+  color:var(--brand);
+  max-height:80vh;
+  overflow-y:auto;
+  animation:fadeIn .5s ease;
+}
+
+@keyframes fadeIn{
+  from{opacity:0;transform:scale(.97)}
+  to{opacity:1;transform:scale(1)}
+}
+
+.close-btn{
+  position:absolute;
+  top:12px;
+  right:16px;
+  background:var(--brand);
+  color:#fff;
+  border:none;
+  border-radius:50%;
+  width:32px;
+  height:32px;
+  font-size:18px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.fade-section{
+  animation:fadeIn .5s ease;
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+
+<!-- FRONT PAGE -->
+<section id="frontPage">
+  <div class="front-overlay"></div>
+
+  <div class="front-inner">
+    <img src="https://i.imgur.com/nus2B9C.png" class="logo-big" alt="logo"> <!-- UPDATED LOGO -->
+    <div class="welcome">Welcome to Esparagoza Dental Clinic</div>
+
+    <div class="meta-row">
+      <div class="pill muted-white" id="todayDate">Today</div>
+      <div class="pill muted-white" id="dentistStatus">Dentist: ...</div>
+    </div>
+
+    <button class="cta-btn" id="toBookingBtn">Make an Appointment</button>
+  </div>
+</section>
+
+<!-- BOOKING PAGE -->
+<main id="bookingPage" aria-hidden="true">
+  <img src="https://i.imgur.com/nus2B9C.png" alt="logo" class="book-logo"> <!-- UPDATED LOGO -->
+
+  <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <button class="btn-primary" id="prevMonth" style="width:48px">&#10094;</button>
+        <div style="font-weight:700;color:var(--brand);font-size:18px" id="monthTitle">Month</div>
+        <button class="btn-primary" id="nextMonth" style="width:48px">&#10095;</button>
+      </div>
+
+      <div class="weeknames">
+        <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div>
+        <div>Thu</div><div>Fri</div><div>Sat</div>
+      </div>
+
+      <div class="cal-grid" id="calGrid"></div>
+
+      <p style="text-align:center;font-size:12px;margin-top:6px;color:#3b6b90">
+        Closed or fully booked dates are grayed out.
+      </p>
+    </div>
+
+    <section class="card" id="bookingFormSection">
+      <h2 style="color:var(--brand);margin-bottom:10px">Book an Appointment</h2>
+      <form id="bookingForm">
+        <label>Full Name</label><input type="text" id="name" required>
+        <label>Email</label><input type="email" id="email" required>
+        <label>Phone</label><input type="text" id="phone" required>
+        <label>Service</label>
+        <select id="service" required>
+          <option value="">Select Service</option>
+          <option>Pediatric Dentistry</option>
+          <option>Restorative Dentistry (Tooth Filling)</option>
+          <option>Prosthodontics</option>
+          <option>Veneers Dental Crown</option>
+          <option>Cosmetic Dentistry</option>
+          <option>Oral Surgery</option>
+          <option>Orthodontics</option>
+        </select>
+
+        <label>Date</label><input type="text" id="date" readonly required>
+        <label>Time</label><input type="text" id="time" readonly required>
+
+        <div id="slotsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:6px;margin:10px 0;"></div>
+
+        <label>Notes (optional)</label><textarea id="notes" rows="2"></textarea>
+        <button class="btn-primary" type="button" id="submitBookingBtn">Submit Booking</button>
+      </form>
+    </section>
+  </main>
+
+  <div class="toast-wrap" id="toastWrap"></div>
+
+  <!-- MODAL -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal-content">
+      <button class="close-btn" id="closeModal">&times;</button>
+      <div id="sectionContent"></div>
+    </div>
+  </div>
+
+  <!-- SCRIPT -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getDatabase, ref, onValue, get, set, push, runTransaction }
+      from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+
+    // --- Firebase config (kept as in original) ---
+    const firebaseConfig = {
+      apiKey:"AIzaSyCV39b2CkzS_tt75SVXa6z95s6f4qVlfLg",
+      authDomain:"esparagozadentalclinic-6a744.firebaseapp.com",
+      databaseURL:"https://esparagozadentalclinic-6a744-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId:"esparagozadentalclinic-6a744",
+      storageBucket:"esparagozadentalclinic-6a744.firebasestorage.app",
+      messagingSenderId:"959639046373",
+      appId:"1:959639046373:web:ccf39df13d94e527fcec0c"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // --- Helpers & DOM refs ---
+    const el=id=>document.getElementById(id);
+    const frontPage=el("frontPage"), toBookingBtn=el("toBookingBtn"), bookingPage=el("bookingPage"),
+          calGrid=el("calGrid"), prevMonth=el("prevMonth"), nextMonth=el("nextMonth"),
+          monthTitle=el("monthTitle"), dateInput=el("date"), timeInput=el("time"),
+          slotsGrid=el("slotsGrid"), toastWrap=el("toastWrap"), todayDate=el("todayDate"),
+          dentistStatusEl=el("dentistStatus"), modalOverlay=el("modalOverlay"),
+          closeModal=el("closeModal"), sectionContent=el("sectionContent");
+
+    let displayedYear,displayedMonth,closedDates={},slotCounts={},maxSlots=1;
+    const TIME_SLOTS=["9:00 AM","9:30 AM","10:00 AM","10:30 AM","11:00 AM","11:30 AM","12:00 NN","12:30 PM","1:00 PM","1:30 PM","2:00 PM","2:30 PM","3:00 PM","3:30 PM","4:00 PM"];
+
+    const fmt=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+    const slotKey=s=>s.replace(/[^a-zA-Z0-9]/g,"_").toLowerCase();
+
+    function showToast(msg,type="info"){
+      const e=document.createElement("div");
+      e.className=`toast ${type}`;e.textContent=msg;
+      toastWrap.appendChild(e);
+      setTimeout(()=>e.classList.add("show"),100);
+      setTimeout(()=>e.remove(),3000);
+    }
+
+    // --- Firebase listeners ---
+    onValue(ref(db,"closed_dates"),s=>{closedDates=s.exists()?s.val():{};renderCalendar();});
+    onValue(ref(db,"settings/maxSlots"),s=>{maxSlots=s.exists()?s.val():1;});
+    onValue(ref(db,"slot_counts"),s=>{slotCounts=s.exists()?s.val():{};renderCalendar();});
+
+    onValue(ref(db,"dentist_status"),s=>{
+      const v=s.exists()?String(s.val()).toUpperCase():"OUT";
+      dentistStatusEl.textContent=`Dentist: ${v}`;
+      dentistStatusEl.classList.toggle("status-in",v==="IN");
+      dentistStatusEl.classList.toggle("status-out",v!=="IN");
+    });
+
+    todayDate.textContent=new Date().toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric",year:"numeric"});
+
+    // --- EmailJS send wrapper ---
+    function sendEmail(tid,data){
+      try{
+        emailjs.init("cVyQCkIy0P6hPyKrH");
+        return emailjs.send("service_7k6q958",tid,data)
+          .then(()=>showToast("Confirmation email sent!","success"))
+          .catch(()=>showToast("Email not sent.","error"));
+      }catch(e){
+        console.warn("EmailJS error", e);
+        showToast("Email service unavailable.","error");
+      }
+    }
+
+    // --- Calendar rendering ---
+    function renderCalendar(y,m){
+      const now=new Date();
+      if(!y&&!m){y=now.getFullYear();m=now.getMonth();}
+      displayedYear=y;displayedMonth=m;
+      const first=new Date(y,m,1);
+      monthTitle.textContent=first.toLocaleString("default",{month:"long",year:"numeric"});
+      calGrid.innerHTML="";
+      const start=first.getDay(),days=new Date(y,m+1,0).getDate();
+
+      for(let i=0;i<start;i++){
+        const e=document.createElement("div");
+        e.className="day-tile";
+        e.style.visibility="hidden";
+        calGrid.appendChild(e);
+      }
+
+      for(let d=1;d<=days;d++){
+        const date=new Date(y,m,d),iso=fmt(date);
+        const div=document.createElement("div");
+        div.className="day-tile";div.textContent=d;
+
+        const counts=slotCounts[iso]||{},
+              full=Object.values(counts).filter(v=>v>=maxSlots).length>=TIME_SLOTS.length;
+
+        if(closedDates[iso]||full)div.classList.add("closed");
+        else if(date<new Date().setHours(0,0,0,0))div.style.opacity=.4;
+        else div.onclick=()=>{dateInput.value=iso;loadSlots(iso);showToast("Selected "+iso,"success");el("bookingFormSection").scrollIntoView({behavior:"smooth"});};
+
+        const t=new Date();t.setHours(0,0,0,0);
+        if(date.getTime()===t.getTime())div.classList.add("today");
+        calGrid.appendChild(div);
+      }
+    }
+
+    prevMonth.onclick=()=>{const d=new Date(displayedYear,displayedMonth-1,1);renderCalendar(d.getFullYear(),d.getMonth());};
+    nextMonth.onclick=()=>{const d=new Date(displayedYear,displayedMonth+1,1);renderCalendar(d.getFullYear(),d.getMonth());};
+    renderCalendar();
+
+    // --- Load time slots for a date ---
+    async function loadSlots(dateKey){
+      slotsGrid.innerHTML="";
+      const cSnap=await get(ref(db,`slot_counts/${dateKey}`));
+      const counts=cSnap.exists()?cSnap.val():{};
+      TIME_SLOTS.forEach(slot=>{
+        const k=slotKey(slot),c=counts[k]||0,full=c>=maxSlots;
+        const b=document.createElement("button");
+        b.className="slot-btn";
+        b.textContent=slot+(full?" • FULL":"");
+        if(full) b.classList.add("booked");
+        else b.onclick=()=>{ timeInput.value=slot; document.querySelectorAll(".slot-btn").forEach(x=>x.classList.remove("selected")); b.classList.add("selected"); };
+        slotsGrid.appendChild(b);
+      });
+    }
+
+    // --- Booking submission ---
+    const nameEl=el("name"), emailEl=el("email"), phoneEl=el("phone"), serviceEl=el("service"), notesEl=el("notes");
+    el("bookingForm").addEventListener("keydown",e=>{ if(e.key==="Enter") e.preventDefault(); });
+
+    el("submitBookingBtn").addEventListener("click",async e=>{
+      e.preventDefault();
+      const name=nameEl.value.trim(), email=emailEl.value.trim(), phone=phoneEl.value.trim(),
+            notes=notesEl.value.trim(), service=serviceEl.value, date=dateInput.value, time=timeInput.value;
+
+      if(!date||!time) return showToast("Select date & time!","error");
+
+      const key=slotKey(time), slotRef=ref(db,`slot_counts/${date}/${key}`);
+      try{
+        const booked=await runTransaction(slotRef,c=>(c||0)+1);
+        if(booked.snapshot.val()>maxSlots){
+          showToast("Time slot full!","error"); return;
+        }
+
+        const newRef=push(ref(db,"bookings"));
+        await set(newRef,{name,email,phone,service,date,time,notes,createdAt:new Date().toISOString()});
+
+        // send confirmation email (template id kept as original)
+        sendEmail("template_td348he",{name,email,phone,service,date,time,notes});
+
+        showToast("Booking successful!","success");
+        el("bookingForm").reset(); timeInput.value="";
+        renderCalendar(displayedYear,displayedMonth);
+      }catch(err){
+        console.error(err);
+        showToast("Booking failed!","error");
+      }
+    });
+
+    // --- Front to booking transition ---
+    toBookingBtn.onclick=()=>{ frontPage.classList.add("fadeOut"); setTimeout(()=>bookingPage.classList.add("show"),400); };
+
+    // --- Modal mechanics (used for informational modals) ---
+    function openModal(html){
+      sectionContent.innerHTML=html;
+      sectionContent.classList.add("fade-section");
+      modalOverlay.style.display="flex";
+      setTimeout(()=>modalOverlay.classList.add("show"),10);
+    }
+    function closeModalNow(){ modalOverlay.classList.remove("show"); setTimeout(()=>modalOverlay.style.display="none",500); }
+    closeModal.onclick=closeModalNow;
+    modalOverlay.onclick=e=>{ if(e.target===modalOverlay) closeModalNow(); };
+
+    // Optional: Example usage for admin to open info modal (not used by default)
+    // openModal('<div style="text-align:center"><h3>Info</h3><p>Clinic info here</p></div>');
+  </script>
+</div>
+</body>
+  </html>
