@@ -85,11 +85,25 @@ body{
 }
 
 /* updated logo */
+/* Balanced size + centered + glow */
+.logo-big{
+  width: 70%;
+  max-width: 380px;
+  height: auto;
+  border-radius: 14px;
+  position: relative;
+  overflow: hidden;     /* needed for the flash */
+  display: block;
+  margin: 0 auto 22px auto;   /* centered + spacing */
+  box-shadow: 0 10px 34px rgba(0,0,0,0.22);
+}
+
+/* Flash light animation */
 .logo-big::after{
   content:"";
   position:absolute;
   top:0;
-  left:-100%;
+  left:-120%;
   width:60%;
   height:100%;
   background:linear-gradient(
