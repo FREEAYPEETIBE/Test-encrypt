@@ -94,10 +94,19 @@ body{
   }
 
   /* Logo */
+  /* default (desktop / tablet) */
+.logo-big{
+  width: 400px !important;
+  height: auto !important;
+  display: block;
+  margin: 0 auto 20px auto !important;
+}
+
+/* mobile fix */
+@media(max-width: 600px){
   .logo-big{
-    width: 400px !important;
-    height: auto !important;
-    display: block;
+    width: 90% !important;      /* fits the screen width */
+    max-width: 300px !important; /* still large but centered */
     margin: 0 auto 20px auto !important;
   }
 
