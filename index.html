@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Esparagoza Dental Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+
+<style>
+:root{
+  --brand:#0b6bcb;
+  --accent:#2ea0ff;
+  --success:#00b386;
+  --danger:#d9534f;
+  --card-bg:#ffffff;
+  --muted:#999;
+  --form-border:#e6edf8;
+}
+
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Poppins',sans-serif;scroll-behavior:smooth}
+html,body{height:100%}
+body{
+  background:linear-gradient(180deg,#e9f4ff 0%,#f4f9ff 100%);
+  min-height:100vh;
+  color:var(--brand);
+}
+
+/* layout */
+.app{min-height:100vh;display:flex;align-items:stretch;justify-content:center;padding:24px 12px}
+
+/* FRONT PAGE */
+#frontPage{
+  position:fixed;inset:0;
+  background-image:url('https://i.imgur.com/qKJc5zC.png');
+  background-size:cover;background-position:center;
+  display:flex;align-items:center;justify-content:center;z-index:40;
+  transition:opacity .6s ease,transform .6s ease;
+}
+#frontPage.fadeOut{opacity:0;pointer-events:none;transform:scale(1.03)}
+
+.front-overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.25),rgba(255,255,255,.08));backdrop-filter:blur(1px)}
+
+.front-inner{
+  position:relative;z-index:2;max-width:980px;width:92%;text-align:center;padding:130px 18px 40px;border-radius:14px;color:#fff;display:flex;flex-direction:column;align-items:center;gap:12px;
+}
+.logo-big{width:380px;height:auto;display:block;margin:0 auto 6px}
+.welcome{font-size:30px;font-weight:700;color:#fff;text-shadow:0 3px 14px rgba(0,0,0,.4)}
+.meta-row{display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:center}
+.pill{background:rgba(255,255,255,.12);padding:10px 14px;border-radius:999px;font-weight:700;color:#fff}
+.status-in{background:linear-gradient(90deg,#67e3a1,#00b386);color:#053017}
+.status-out{background:linear-gradient(90deg,#ffdede,#ff8a8a);color:#4a0b0b}
+.cta-btn{margin-top:12px;padding:14px 22px;border-radius:12px;border:none;font-weight:700;background:linear-gradient(90deg,var(--accent),var(--brand));color:#fff;cursor:pointer;box-shadow:0 8px 26px rgba(11,107,203,.24);transition:transform .16s}
+.cta-btn:active{transform:translateY(1px) scale(.997)}
+
+/* booking - container wrapper (keeps centered and responsive) */
+.container {
+  max-width:980px;
+  width:100%;
+  margin:36px auto 80px;
+}
+
+/* card / form styles */
+.card {background:var(--card-bg);border-radius:16px;box-shadow:0 10px 30px rgba(7,36,63,.08);padding:22px;margin:18px auto; }
+label {display:block;margin:8px 0 6px;color:var(--brand);font-weight:600;font-size:14px}
+input,select,textarea{width:100%;padding:10px 12px;border:1px solid var(--form-border);border-radius:10px;font-size:15px;outline:none;background:#fff}
+.btn-primary{cursor:pointer;transition:.3s;background:linear-gradient(90deg,var(--accent),var(--brand));color:#fff;border:none;border-radius:10px;padding:12px 18px;font-weight:700;width:100%}
+
+.weeknames{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;color:#3b6b90;font-size:12px;text-align:center;margin-bottom:6px}
+.cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;width:100%}
+.day-tile{aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;border-radius:10px;background:#fff;color:var(--brand);font-weight:600;cursor:pointer;transition:background .2s,transform .2s}
+.day-tile:hover{transform:scale(1.06)}
+.day-tile.today{border:2px solid var(--brand)}
+.day-tile.closed{background:#f5f7fa;color:#aaa;cursor:not-allowed;}
+
+/* slot buttons */
+.slot-btn{padding:8px;border:none;border-radius:8px;margin:4px;background:#f2f8ff;color:var(--brand);font-weight:600;cursor:pointer}
+.slot-btn.selected{background:var(--brand);color:#fff}
+.slot-btn.booked{background:#ececec;color:#777;cursor:not-allowed}
+
+/* toast */
+.toast-wrap{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:1000}
+.toast{background:var(--brand);color:#fff;padding:10px 16px;border-radius:8px;margin-top:8px;opacity:0;transition:opacity .3s}
+.toast.show{opacity:1}.toast.success{background:var(--success)}.toast.error{background:var(--danger)}
+
+/* modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);backdrop-filter:blur(4px);justify-content:center;align-items:center;z-index:1001;opacity:0;transition:opacity .5s}
+.modal-overlay.show{display:flex;opacity:1}
+.modal-content{background:#fff;border-radius:16px;max-width:720px;width:92%;padding:18px;box-shadow:0 10px 30px rgba(0,0,0,.15);color:var(--brand);max-height:80vh;overflow-y:auto}
+.close-btn{position:absolute;top:12px;right:16px;background:var(--brand);color:#fff;border:none;border-radius:50%;width:32px;height:32px;font-size:18px;font-weight:bold;cursor:pointer}
+
+/* signature canvas */
+.sig-wrap{border:1px dashed #d8e7fb;padding:12px;border-radius:8px;background:#fcfeff}
+canvas{border-radius:6px;background:#fff;width:100%;height:170px;display:block}
+
+/* responsive tweaks */
+@media (max-width:800px){ .front-inner{padding-top:120px} .logo-big{width:90%} .cal-grid{gap:6px} .day-tile{aspect-ratio:1/1;}}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- FRONT PAGE -->
+<section id="frontPage">
+  <div class="front-overlay"></div>
+  <div class="front-inner">
+    <img src="https://i.imgur.com/cUQHJFZ.png" class="logo-big" alt="logo">
+    <div class="welcome">Welcome to Dental Hub Davao</div>
+    <div class="meta-row">
+      <div class="pill muted-white" id="todayDate">Today</div>
+      <div class="pill muted-white" id="dentistStatus">Dentist: ...</div>
+    </div>
+    <button class="cta-btn" id="toBookingBtn">Make an Appointment</button>
+  </div>
+</section>
+
+<!-- container for booking + content -->
+<div class="container" id="mainContainer" aria-hidden="true">
+<!-- (Booking page content — paste Part 2 here) -->
+
+  <!-- BOOKING PAGE (Header image + form layout follows the reference UI) -->
+  <main id="bookingPage" aria-hidden="true">
+
+    <!-- TOP HEADER IMAGE (your chosen header) -->
+    <div style="
+  width:100%;
+  height:180px;
+  background-image:url('https://i.imgur.com/V7CJsPy.png');
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
+  margin:0 0 15px 0;
+  box-shadow:0 3px 10px rgba(0,0,0,0.15);
+"></div>
+
+    <!-- Title -->
+    <h2 style="text-align:center;margin-top:6px;margin-bottom:18px;color:var(--brand);font-weight:700;font-size:24px;">Dental Appointment Booking & Consent</h2>
+
+    <div class="card" style="padding:18px 20px;">
+
+      <!-- Calendar Section -->
+      <section style="margin-bottom:20px">
+        <h3 style="color:var(--brand);margin-bottom:10px">Select Date</h3>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <button class="btn-primary" id="prevMonth" style="width:48px">&#10094;</button>
+          <div style="font-weight:700;color:var(--brand);font-size:18px" id="monthTitle">Month</div>
+          <button class="btn-primary" id="nextMonth" style="width:48px">&#10095;</button>
+        </div>
+
+        <div class="weeknames"><div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div></div>
+        <div class="cal-grid" id="calGrid"></div>
+        <p style="text-align:center;font-size:12px;margin-top:6px;color:#3b6b90">Closed or fully booked dates are grayed out.</p>
+      </section>
+
+      <!-- Time Slots -->
+      <section style="margin-top:12px;margin-bottom:20px">
+        <h3 style="color:var(--brand);margin-bottom:8px">Select Time</h3>
+        <div id="slotsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:6px;margin:10px 0;"></div>
+      </section>
+
+      <!-- BIG FORM: Patient Info + Procedure + Waiver + Signature -->
+      <form id="bookingForm" style="margin-top:6px">
+        <!-- Patient Information -->
+        <h3 style="color:var(--brand);margin-bottom:8px">Patient Information</h3>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div>
+            <label>First Name</label>
+            <input type="text" id="firstName" required>
+          </div>
+          <div>
+            <label>Last Name</label>
+            <input type="text" id="lastName" required>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:6px">
+          <div>
+            <label>Age</label>
+            <input type="number" id="age" min="0">
+          </div>
+          <div>
+            <label>Date of Birth</label>
+            <input type="date" id="dob">
+          </div>
+          <div>
+            <label>Is Minor?</label>
+            <select id="isMinor"><option value="no">No</option><option value="yes">Yes</option></select>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+          <div>
+            <label>Phone Number</label>
+            <input type="text" id="phone" required>
+          </div>
+          <div>
+            <label>Email</label>
+            <input type="email" id="email" required>
+          </div>
+        </div>
+
+        <div style="margin-top:8px">
+          <label>Address</label>
+          <input type="text" id="address">
+        </div>
+
+        <!-- Hidden readonly booking date/time fields (populated by calendar/slots) -->
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <div style="flex:1">
+            <label>Selected Date</label>
+            <input type="text" id="date" readonly required>
+          </div>
+          <div style="flex:1">
+            <label>Selected Time</label>
+            <input type="text" id="time" readonly required>
+          </div>
+        </div>
+
+        <!-- Dental Procedure Details -->
+        <h3 style="color:var(--brand);margin-top:16px;margin-bottom:8px">Dental Procedure Details</h3>
+
+        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;">
+          <label style="font-weight:600"><input type="checkbox" class="proc" value="Tooth Extraction"> Tooth Extraction</label>
+          <label style="font-weight:600"><input type="checkbox" class="proc" value="Grafting"> Grafting</label>
+          <label style="font-weight:600"><input type="checkbox" class="proc" value="Restoration"> Restoration</label>
+          <label style="font-weight:600"><input type="checkbox" class="proc" value="Cosmetic Dentistry"> Cosmetic Dentistry</label>
+          <label style="font-weight:600"><input type="checkbox" class="proc" value="Implants"> Implants</label>
+          <label style="font-weight:600"><input type="checkbox" class="proc" value="Prosthetics"> Prosthetics</label>
+          <label style="font-weight:600"><input type="checkbox" class="proc" value="Oral Sedation"> Oral Sedation</label>
+          <label style="font-weight:600"><input type="checkbox" class="proc" value="Treatment"> Treatment</label>
+          <label style="font-weight:600"><input type="checkbox" class="proc" value="Root Planing"> Root Planing</label>
+        </div>
+
+        <div style="margin-top:8px">
+          <label>Do you have any allergies?</label>
+          <textarea id="allergies" rows="2"></textarea>
+        </div>
+
+        <div style="margin-top:8px">
+          <label>Are you currently taking any medications?</label>
+          <textarea id="medications" rows="2"></textarea>
+        </div>
+
+        <div style="margin-top:8px">
+          <label>Any medical conditions we should be aware of?</label>
+          <textarea id="conditions" rows="2" placeholder="e.g., diabetes, cardiovascular problems, communicable disease"></textarea>
+        </div>
+
+        <!-- Acknowledgement and Waiver -->
+        <h3 style="color:var(--brand);margin-top:14px;margin-bottom:8px">Acknowledgement and Waiver</h3>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <label><input type="checkbox" id="ack1"> I allow and authorize the clinic to perform the procedure and understand the nature and risks.</label>
+          <label><input type="checkbox" id="ack2"> I allow the doctor to administer anesthesia and I understand possible side effects.</label>
+          <label><input type="checkbox" id="ack3"> I understand the post-treatment instructions and agree to follow them.</label>
+          <label><input type="checkbox" id="ack4"> I acknowledge that all information provided is true and accurate.</label>
+        </div>
+
+        <!-- Signature -->
+        <h3 style="color:var(--brand);margin-top:14px;margin-bottom:8px">Signature</h3>
+        <div class="sig-wrap">
+          <canvas id="sigCanvas"></canvas>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button type="button" id="clearSig" class="btn-primary" style="background:#777;width:auto;padding:8px 12px">Clear</button>
+            <button type="button" id="saveSig" class="btn-primary" style="width:auto;padding:8px 12px">Save Signature</button>
+            <div style="flex:1"></div>
+            <div style="min-width:160px">
+              <label>Signed Date</label>
+              <input type="date" id="signedDate">
+            </div>
+          </div>
+        </div>
+
+        <!-- Submit -->
+        <div style="margin-top:18px">
+          <button class="btn-primary" type="button" id="submitBookingBtn">Submit Booking</button>
+        </div>
+
+      </form>
+    </div>
+
+    <!-- toast + modal -->
+    <div class="toast-wrap" id="toastWrap"></div>
+    <div class="modal-overlay" id="modalOverlay"><div class="modal-content"><button class="close-btn" id="closeModal">&times;</button><div id="sectionContent"></div></div></div>
+
+  </main>
+
+  <!-- SCRIPTS: Calendar, Firebase, EmailJS, Booking submission, Signature handling -->
+<script type="module">
+  // Firebase imports
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+  import { getDatabase, ref, onValue, get, set, push, runTransaction } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+
+  // --- Firebase config (kept from your previous file) ---
+  const firebaseConfig = {
+    apiKey:"AIzaSyCV39b2CkzS_tt75SVXa6z95s6f4qVlfLg",
+    authDomain:"esparagozadentalclinic-6a744.firebaseapp.com",
+    databaseURL:"https://esparagozadentalclinic-6a744-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId:"esparagozadentalclinic-6a744",
+    storageBucket:"esparagozadentalclinic-6a744.firebasestorage.app",
+    messagingSenderId:"959639046373",
+    appId:"1:959639046373:web:ccf39df13d94e527fcec0c"
+  };
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  // DOM refs
+  const el = id => document.getElementById(id);
+  const frontPage = el("frontPage"), toBookingBtn = el("toBookingBtn"), bookingPage = el("bookingPage"),
+        calGrid = el("calGrid"), prevMonthBtns = document.querySelectorAll("#prevMonth"), nextMonthBtns = document.querySelectorAll("#nextMonth"),
+        monthTitle = el("monthTitle"), dateInput = el("date"), timeInput = el("time"), slotsGrid = el("slotsGrid"),
+        toastWrap = el("toastWrap"), todayDate = el("todayDate"), dentistStatusEl = el("dentistStatus"),
+        modalOverlay = el("modalOverlay"), closeModal = el("closeModal"), sectionContent = el("sectionContent");
+
+  // Booking form refs
+  const bookingForm = el("bookingForm"), submitBookingBtn = el("submitBookingBtn");
+  const firstNameEl = el("firstName"), lastNameEl = el("lastName"), ageEl = el("age"), dobEl = el("dob"),
+        phoneEl = el("phone"), emailEl = el("email"), addressEl = el("address"),
+        allergiesEl = el("allergies"), medicationsEl = el("medications"), conditionsEl = el("conditions"),
+        signedDateEl = el("signedDate"),
+        saveSigBtn = el("saveSig"), clearSigBtn = el("clearSig");
+
+  let signatureDataUrl = ""; // saved signature
+
+  // calendar & slots variables
+  let displayedYear, displayedMonth, closedDates = {}, slotCounts = {}, maxSlots = 1;
+  const TIME_SLOTS = ["9:00 AM","9:30 AM","10:00 AM","10:30 AM","11:00 AM","11:30 AM","12:00 NN","12:30 PM","1:00 PM","1:30 PM","2:00 PM","2:30 PM","3:00 PM","3:30 PM","4:00 PM"];
+
+  // helpers
+  const fmt = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+  const slotKey = s => s.replace(/[^a-zA-Z0-9]/g,"_").toLowerCase();
+
+  function showToast(msg, type="info"){
+    const e = document.createElement("div");
+    e.className = `toast ${type}`;
+    e.textContent = msg;
+    toastWrap.appendChild(e);
+    setTimeout(()=>e.classList.add("show"), 80);
+    setTimeout(()=>{ e.classList.remove("show"); setTimeout(()=>e.remove(),400); }, 3200);
+  }
+
+  // EmailJS wrapper (keeps original keys)
+  function sendEmail(tid,data){
+    try {
+      emailjs.init("cVyQCkIy0P6hPyKrH");
+      return emailjs.send("service_7k6q958", tid, data)
+        .then(()=> showToast("Confirmation email sent!", "success"))
+        .catch(err => { console.warn("emailjs error", err); showToast("Email not sent.", "error"); });
+    } catch(e) { console.warn(e); showToast("Email service unavailable.", "error"); }
+  }
+
+  // --- Firebase listeners for dynamic data ---
+  onValue(ref(db,"closed_dates"), s => { closedDates = s.exists()?s.val():{}; renderCalendar(); });
+  onValue(ref(db,"settings/maxSlots"), s => { maxSlots = s.exists()?s.val():1; });
+  onValue(ref(db,"slot_counts"), s => { slotCounts = s.exists()?s.val():{}; renderCalendar(); });
+
+  onValue(ref(db,"dentist_status"), s => {
+    const v = s.exists()?String(s.val()).toUpperCase():"OUT";
+    dentistStatusEl.textContent = `Dentist: ${v}`;
+    dentistStatusEl.classList.toggle("status-in", v==="IN");
+    dentistStatusEl.classList.toggle("status-out", v!=="IN");
+  });
+
+  todayDate.textContent = new Date().toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric",year:"numeric"});
+
+  // --- Calendar rendering ---
+  function renderCalendar(y,m){
+    const now = new Date();
+    if(!y && y !== 0 && !m && m !== 0){ y = now.getFullYear(); m = now.getMonth(); }
+    displayedYear = y; displayedMonth = m;
+    const first = new Date(y,m,1);
+    monthTitle.textContent = first.toLocaleString("default",{month:"long",year:"numeric"});
+    calGrid.innerHTML = "";
+    const start = first.getDay(), days = new Date(y,m+1,0).getDate();
+
+    for(let i=0;i<start;i++){
+      const e = document.createElement("div"); e.className = "day-tile"; e.style.visibility="hidden"; calGrid.appendChild(e);
+    }
+
+    for(let d=1; d<=days; d++){
+      const date = new Date(y,m,d), iso = fmt(date);
+      const div = document.createElement("div"); div.className = "day-tile"; div.textContent = d;
+
+      const counts = slotCounts[iso] || {};
+      const full = Object.values(counts).filter(v=>v>=maxSlots).length >= TIME_SLOTS.length;
+
+      if(closedDates[iso] || full) div.classList.add("closed");
+      else if(date < new Date().setHours(0,0,0,0)) div.style.opacity = .45;
+      else div.onclick = ()=> { dateInput.value = iso; loadSlots(iso); showToast("Selected "+iso,"success"); el("slotsGrid").scrollIntoView({behavior:"smooth"}); };
+
+      const t = new Date(); t.setHours(0,0,0,0);
+      if(date.getTime() === t.getTime()) div.classList.add("today");
+      calGrid.appendChild(div);
+    }
+  }
+
+  // attach prev/next buttons (both instances on page)
+  document.querySelectorAll("#prevMonth").forEach(b => b.onclick = ()=>{ const d = new Date(displayedYear,displayedMonth-1,1); renderCalendar(d.getFullYear(),d.getMonth()); });
+  document.querySelectorAll("#nextMonth").forEach(b => b.onclick = ()=>{ const d = new Date(displayedYear,displayedMonth+1,1); renderCalendar(d.getFullYear(),d.getMonth()); });
+
+  renderCalendar();
+
+  // load slots for date from Firebase counts
+  async function loadSlots(dateKey){
+    slotsGrid.innerHTML = "";
+    const snap = await get(ref(db,`slot_counts/${dateKey}`));
+    const counts = snap.exists()?snap.val():{};
+    TIME_SLOTS.forEach(slot => {
+      const k = slotKey(slot), c = counts[k] || 0, full = c >= maxSlots;
+      const b = document.createElement("button");
+      b.className = "slot-btn";
+      b.textContent = slot + (full ? " • FULL" : "");
+      if(full){ b.classList.add("booked"); } else {
+        b.onclick = ()=> {
+          timeInput.value = slot;
+          // highlight selection
+          document.querySelectorAll(".slot-btn").forEach(x => x.classList.remove("selected"));
+          b.classList.add("selected");
+        };
+      }
+      slotsGrid.appendChild(b);
+    });
+  }
+
+  // --- Signature Pad (simple Canvas) ---
+  const sigCanvas = el("sigCanvas");
+  const sigCtx = sigCanvas.getContext("2d");
+  let drawing = false, lastX=0, lastY=0;
+
+  function resizeCanvas(){
+    // handle device pixel ratio for crisp drawing
+    const ratio = Math.max(window.devicePixelRatio || 1, 1);
+    const rect = sigCanvas.getBoundingClientRect();
+    sigCanvas.width = rect.width * ratio;
+    sigCanvas.height = rect.height * ratio;
+    sigCtx.scale(ratio, ratio);
+    sigCtx.lineJoin = 'round';
+    sigCtx.lineCap = 'round';
+    sigCtx.lineWidth = 2.6;
+    sigCtx.strokeStyle = "#0b6bcb";
+  }
+  window.addEventListener("resize", resizeCanvas);
+  resizeCanvas();
+
+  function startDraw(e){
+    drawing = true;
+    const rect = sigCanvas.getBoundingClientRect();
+    const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+    const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+    lastX = x; lastY = y;
+  }
+  function draw(e){
+    if(!drawing) return;
+    e.preventDefault();
+    const rect = sigCanvas.getBoundingClientRect();
+    const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+    const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+    sigCtx.beginPath();
+    sigCtx.moveTo(lastX, lastY);
+    sigCtx.lineTo(x, y);
+    sigCtx.stroke();
+    lastX = x; lastY = y;
+  }
+  function endDraw(){ drawing = false; }
+
+  // mouse
+  sigCanvas.addEventListener("mousedown", startDraw);
+  sigCanvas.addEventListener("mousemove", draw);
+  window.addEventListener("mouseup", endDraw);
+  // touch
+  sigCanvas.addEventListener("touchstart", startDraw);
+  sigCanvas.addEventListener("touchmove", draw);
+  window.addEventListener("touchend", endDraw);
+
+  clearSigBtn.addEventListener("click", ()=>{ sigCtx.clearRect(0,0,sigCanvas.width,sigCanvas.height); signatureDataUrl = ""; showToast("Signature cleared"); });
+
+  saveSigBtn.addEventListener("click", ()=>{
+    // capture as dataURL (png)
+    const dataUrl = sigCanvas.toDataURL("image/png");
+    // test for blank canvas: compare to blank white image size tiny
+    const blank = document.createElement("canvas");
+    blank.width = sigCanvas.width; blank.height = sigCanvas.height;
+    const blankData = blank.toDataURL();
+    if(dataUrl === blankData){ showToast("Please sign first", "error"); return; }
+    signatureDataUrl = dataUrl;
+    // set signed date default to today if empty
+    if(!signedDateEl.value) signedDateEl.value = new Date().toISOString().substring(0,10);
+    showToast("Signature saved", "success");
+  });
+
+  // --- Booking submission logic ---
+  bookingForm.addEventListener("keydown", e => { if(e.key === "Enter") e.preventDefault(); });
+
+  submitBookingBtn.addEventListener("click", async (e) => {
+    e.preventDefault();
+
+    // Basic validation
+    if(!dateInput.value || !timeInput.value) { showToast("Select date and time", "error"); return; }
+    if(!firstNameEl.value.trim() || !lastNameEl.value.trim()) { showToast("Enter full name", "error"); return; }
+    if(!phoneEl.value.trim() || !emailEl.value.trim()) { showToast("Enter contact details", "error"); return; }
+    // check acks
+    const acks = ["ack1","ack2","ack3","ack4"].every(id => el(id).checked);
+    if(!acks){ showToast("Please agree to all acknowledgements", "error"); return; }
+    if(!signatureDataUrl){ showToast("Please provide signature", "error"); return; }
+
+    // gather procedure selections
+    const procEls = Array.from(document.querySelectorAll(".proc")).filter(cb => cb.checked).map(cb=>cb.value);
+    const booking = {
+      name: `${firstNameEl.value.trim()} ${lastNameEl.value.trim()}`,
+      firstName: firstNameEl.value.trim(),
+      lastName: lastNameEl.value.trim(),
+      age: ageEl.value || "",
+      dob: dobEl.value || "",
+      isMinor: el("isMinor").value || "no",
+      phone: phoneEl.value.trim(),
+      email: emailEl.value.trim(),
+      address: addressEl.value.trim(),
+      date: dateInput.value,
+      time: timeInput.value,
+      procedures: procEls,
+      allergies: allergiesEl.value.trim(),
+      medications: medicationsEl.value.trim(),
+      conditions: conditionsEl.value.trim(),
+      acknowledgements: {
+        ack1: el("ack1").checked,
+        ack2: el("ack2").checked,
+        ack3: el("ack3").checked,
+        ack4: el("ack4").checked
+      },
+      signedDate: signedDateEl.value || new Date().toISOString().substring(0,10),
+      signature: signatureDataUrl,
+      notes: "", // reserved
+      createdAt: new Date().toISOString()
+    };
+
+    // Reserve slot with transaction
+    const k = slotKey(booking.time);
+    const slotRef = ref(db, `slot_counts/${booking.date}/${k}`);
+    try {
+      // increment the counter atomically
+      const trans = await runTransaction(slotRef, c => (c || 0) + 1);
+      if(!trans || !trans.snapshot) { showToast("Booking transaction failed", "error"); return; }
+      if(trans.snapshot.val() > maxSlots){
+        showToast("Time slot just filled. Please choose another.", "error");
+        // revert - decrement by 1
+        await runTransaction(slotRef, c => Math.max((c||1) - 1, 0));
+        return;
+      }
+
+      // push booking into bookings node
+      const newRef = push(ref(db, "bookings"));
+      await set(newRef, booking);
+
+      // Save signature in a separate node for convenience (optional)
+      const sigRef = ref(db, `signatures/${newRef.key}`);
+      await set(sigRef, {dataUrl: signatureDataUrl, signedDate: booking.signedDate});
+
+      // Send email (include details; template must be set to accept these)
+      const emailPayload = {
+        to_name: booking.name,
+        to_email: booking.email,
+        phone: booking.phone,
+        date: booking.date,
+        time: booking.time,
+        procedures: booking.procedures.join(", "),
+        notes: booking.notes,
+        signature: booking.signature // note: some email templates can embed base64 images; otherwise include as text
+      };
+      sendEmail("template_td348he", emailPayload);
+
+      showToast("Booking successful!", "success");
+      bookingForm.reset();
+      signatureDataUrl = "";
+      // clear canvas
+      sigCtx.clearRect(0,0,sigCanvas.width,sigCanvas.height);
+      // clear selected slots highlight
+      document.querySelectorAll(".slot-btn").forEach(x => x.classList.remove("selected"));
+      dateInput.value = ""; timeInput.value = "";
+      renderCalendar(displayedYear, displayedMonth);
+
+    } catch(err){
+      console.error("Booking error", err);
+      showToast("Booking failed. Try again.", "error");
+    }
+  });
+
+  // Front to booking transition
+  toBookingBtn.onclick = () => { frontPage.classList.add("fadeOut"); setTimeout(()=>{ bookingPage.classList.add("show"); document.getElementById("mainContainer").removeAttribute("aria-hidden"); }, 420); };
+
+  // Modal mechanics
+  function openModal(html){ sectionContent.innerHTML = html; modalOverlay.style.display = "flex"; setTimeout(()=>modalOverlay.classList.add("show"),10); }
+  function closeModalNow(){ modalOverlay.classList.remove("show"); setTimeout(()=>modalOverlay.style.display="none",400); }
+  closeModal.onclick = closeModalNow;
+  modalOverlay.onclick = e => { if(e.target === modalOverlay) closeModalNow(); };
+
+</script>
+
+</div> <!-- end mainContainer -->
+</div> <!-- end app -->
+</body>
+  </html>
